@@ -11,6 +11,11 @@ from surreal.launch import SurrealDefaultLauncher
 from surreal.env import make_env, make_env_config
 import argparse
 
+import socket
+hostname = socket.gethostname()
+prefix = '/home/jqxu' if hostname.startswith('proj') \
+	or hostname.startswith('pc') \
+	else '/research/dept6/jqxu'
 
 PPO_DEFAULT_LEARNER_CONFIG = Config({
     'model': {
@@ -118,8 +123,8 @@ PPO_DEFAULT_ENV_CONFIG = Config({
     'eval_mode': {
 #         'demonstration': None
         'demonstration': {
-            'use_demo': True, # >--- False to True
-            'demo_root': '/home/jqxu/data/RoboTurk/RoboTurkPilot',
+            'use_demo': False, # >--- False to True
+            'demo_root': os.path.join(preffix, 'data/RoboTurk/RoboTurkPilot'),
             'need_xml': False,
             'num_traj': -1,
             'sampling_schemes': ["random", ],
@@ -128,7 +133,7 @@ PPO_DEFAULT_ENV_CONFIG = Config({
     },
     'demonstration': {
         'use_demo': True, # >--- False to True
-        'demo_root': '/home/jqxu/data/RoboTurk/RoboTurkPilot',
+        'demo_root': os.path.join(preffix, 'data/RoboTurk/RoboTurkPilot'),
         'need_xml': True,
         'num_traj': 1000, # as in RoboTurk paper
         
