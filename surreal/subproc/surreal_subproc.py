@@ -232,13 +232,14 @@ class SubprocSurrealParser:
             print('Putting learner on GPU {}'.format(learner_gpu))
             learner.set_envs({'CUDA_VISIBLE_DEVICES': learner_gpu})
 
-            actors_per_gpu = float(len(actors)) / (len(gpus) - 1)
+            actors_per_gpu = float(len(actors) + 1) / len(gpus) # by jqxu; to put learners and actors on the same gpu; float(len(actors)) / (len(gpus) - 1)
             actors_per_gpu = int(math.ceil(actors_per_gpu))
             print('Putting up to {} agents/evals on each of gpus {}'.format(
-                    actors_per_gpu, ','.join([x for x in gpus[1:]])))
+                    actors_per_gpu, ','.join([x for x in gpus[:]]))) # by jqxu; gpus[1:] -> gpus[:]
 
             for i, actor in enumerate(actors):
-                cur_gpu = gpus[1 + i // actors_per_gpu]
+                cur_gpu = gpus[(1 + i // actors_per_gpu) % len(gpus)] # by jqxu; gpus[1 + i // actors_per_gpu]
+                # print("**** {} on {}".format(i, cur_gpu))
                 actor.set_envs({'CUDA_VISIBLE_DEVICES': cur_gpu})
 
     def main(self):
