@@ -5,7 +5,9 @@ import collections
 from collections import deque
 from operator import mul
 import functools
+import os
 import sys
+import time
 import gym
 
 
@@ -257,6 +259,19 @@ class RobosuiteWrapper(Wrapper):
 
     def _reset(self):
         obs = self.env.reset()
+        
+#         print(self.env.__class__.__name__)
+        if self.env.__class__.__name__ == 'DemoSamplerWrapper':
+            # deal with 'OSError: [Errno 28] No space left on device' issue in /tmp
+            files = os.listdir('/tmp')
+            for file in files:
+                if file.endswith('.xml') and os.path.exists(os.path.join('/tmp', file)):
+                    try:
+                        if time.time() - os.path.getctime(os.path.join('/tmp', file)) > 20:
+                            os.remove(os.path.join('/tmp', file))
+                    except:
+#                         print("already removed: {}".format(os.path.join('/tmp', file)))
+                        pass
 
         if self.use_depth:
             obs['image'] = np.concatenate((obs['image'], np.expand_dims(obs['depth'], 2)), 2)

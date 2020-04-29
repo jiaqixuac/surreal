@@ -16,6 +16,8 @@ from surreal.env import (
     EvalTensorplexMonitor,
     VideoWrapper
 )
+import numpy as np
+from collections import deque
 
 AGENT_MODES = ['training', 'eval_deterministic', 'eval_stochastic', 
     'eval_deterministic_local', 'eval_stochastic_local']
@@ -54,6 +56,7 @@ class Agent(object, metaclass=U.AutoInitializeMeta):
         self.current_episode = 0
         self.cumulative_steps = 0
         self.current_step = 0
+        self.rewards = deque(maxlen=100)
 
         self.actions_since_param_update = 0
         self.episodes_since_param_update = 0
@@ -183,7 +186,8 @@ class Agent(object, metaclass=U.AutoInitializeMeta):
         """
             Called before act is called by agent main script
         """
-        if self.agent_mode == 'training':
+        # if self.agent_mode == 'training':
+        if self.agent_mode in ('training', 'eval_deterministic', 'eval_stochastic'): # by jqxu
             if self._fetch_parameter_mode == 'step' and \
                     self._fetch_parameter_tracker.track_increment():
                 self.fetch_parameter()
@@ -204,18 +208,20 @@ class Agent(object, metaclass=U.AutoInitializeMeta):
             Called by agent process.
             Can beused to reset internal states before an episode starts
         """
-        if self.agent_mode == 'training':
+        # if self.agent_mode == 'training':
+        if self.agent_mode in ('training', 'eval_deterministic', 'eval_stochastic'): # by jqxu
             if self._fetch_parameter_mode == 'episode' and \
                     self._fetch_parameter_tracker.track_increment():
                 self.fetch_parameter()
 
-    def post_episode(self):
+    def post_episode(self, current_reward):
         """
             Called by agent process.
             Can beused to reset internal states after an episode ends
             I.e. after the post_action when done = True
         """
         self.current_episode += 1
+        self.rewards.append(current_reward)
 
     #######
     # Main loops.
@@ -260,15 +266,21 @@ class Agent(object, metaclass=U.AutoInitializeMeta):
             obs = obs_next
             if done:
                 break
-        self.post_episode()
+        self.post_episode(total_reward)
 
         if self.agent_mode in ['eval_deterministic_local', 'eval_stochastic_local']:
             return
 
         if self.current_episode % 20 == 0:
-            self.log.info('Episode {} reward {}'
-                          .format(self.current_episode,
-                                  total_reward))
+            self.log.info('Agent-id: [{:>2}], Mode: {}, Episode: [{}], Reward: {:>5.1f}, Mean Reward: {:7.3f}, Non-zero: {}/{:>3}'
+                          .format(self.agent_id,
+                                  self.agent_mode,
+                                  self.current_episode,
+                                  total_reward, 
+                                  np.mean(self.rewards),
+                                  np.count_nonzero(self.rewards),
+                                  len(self.rewards)
+                                 ))
 
     def get_env(self):
         """

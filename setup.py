@@ -28,6 +28,7 @@ setup(
             'surreal-subproc=surreal.subproc.surreal_subproc:main',
             'surreal-ddpg=surreal.main.ddpg_configs:main',
             'surreal-ppo=surreal.main.ppo_configs:main',
+            'surreal-ppo-demo=surreal.main.ppo_configs_roboturk:main',
             'surreal-default-config=surreal.main.generate_default_config:main',
         ]
     },

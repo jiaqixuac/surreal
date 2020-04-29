@@ -47,6 +47,8 @@ def make_env(env_config, mode=None):
     """
     env_name = env_config.env_name
     env_category, env_name = env_name.split(':')
+    if mode == 'eval':
+        print(' *** === EVAL {}'.format(env_config.demonstration))
     if mode == 'eval' and 'eval_mode' in env_config:
         for k, v in env_config.eval_mode.items():
             env_config[k] = v
@@ -76,19 +78,53 @@ def make_robosuite(env_name, env_config):
     env = robosuite.make(
         env_name,
         has_renderer=env_config.render,
-        ignore_done=True,
+        ignore_done=False, # ---> not totally understand
         use_camera_obs=env_config.pixel_input,
         has_offscreen_renderer=env_config.pixel_input,
         camera_height=84,
         camera_width=84,
         render_collision_mesh=False,
         render_visual_mesh=True,
+#         horizon=env_config.limit_episode_length, # ---> surreal/agent/base.py/prepare_env_agent
         camera_name='agentview',
         use_object_obs=(not env_config.pixel_input),
         camera_depth=env_config.use_depth,
-        reward_shaping=True,
+        reward_shaping=True, # ---> as in paper RoboTurk
         # demo_config=env_config.demonstration,
     )
+    
+#     if env_config.demonstration is None:
+#         # eval mode
+#         print('\n{}\n{}\n'.format(env_name, env_config))
+#     assert 'use_demo' in env_config.demonstration, "Error: {}".format(env_config)
+#     print(env_config.demonstration)
+    if env_config.demonstration and env_config.demonstration['use_demo']:
+        from robosuite.wrappers.demo_sampler_wrapper import DemoSamplerWrapper
+        import random
+        
+        VALID_ENVIRONMENTS = ('SawyerPickPlaceCan', 'SawyerNutAssemblyRound')
+        assert env_name in VALID_ENVIRONMENTS, 'Not available for use demo: {}'.format(env_name)
+        
+        
+        task_2_folder = {
+            'SawyerPickPlaceCan': 'bins-Can',
+            'SawyerNutAssemblyRound': 'pegs-RoundNut',
+        }
+        demo_path = os.path.join(
+            env_config.demonstration['demo_root'], task_2_folder[env_name]
+        )
+        env = DemoSamplerWrapper(
+            env,
+            demo_path=demo_path,
+            need_xml=env_config.demonstration['need_xml'],
+            num_traj=env_config.demonstration['num_traj'],
+            sampling_schemes=env_config.demonstration['sampling_schemes'],
+            scheme_ratios=env_config.demonstration['scheme_ratios'],
+        )
+        random.seed() # by jqxu, important as may use same seed to generate same demo for all agents
+                      # in DemoSamplerWrapper when num_traj > 0
+        print('*** Using DemoSamplerWrapper: {} ***'.format(demo_path))
+    
     env = RobosuiteWrapper(env, env_config)
     env = FilterWrapper(env, env_config)
     env = ObservationConcatenationWrapper(env)
@@ -100,6 +136,8 @@ def make_robosuite(env_name, env_config):
             env = FrameStackWrapper(env, env_config)
     env_config.action_spec = env.action_spec()
     env_config.obs_spec = env.observation_spec()
+    print("[make_robosuite] \taction_spec: {}, \n\t\t\tobs_spec: {}\n"
+          .format(env.action_spec(), env.observation_spec())) # by jqxu, debug purpose
     return env, env_config
 
 
