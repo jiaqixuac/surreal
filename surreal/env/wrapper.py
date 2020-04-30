@@ -227,6 +227,7 @@ class RobosuiteWrapper(Wrapper):
     def _add_modality(self, obs, verbose=False):
         pixel_modality = collections.OrderedDict()
         flat_modality = collections.OrderedDict()
+        filtered = [] # by jqxu, for compact output
         for key in obs:
             if key == 'image' and 'camera0' in self._input_list['pixel']:
                 pixel_modality['camera0'] = obs[key]
@@ -235,7 +236,10 @@ class RobosuiteWrapper(Wrapper):
             elif key in self._input_list['low_dim']:
                 flat_modality[key] = obs[key]
             elif verbose:
-                print('Mujoco: skipping observation key:', key)
+                filtered.append(key)
+                # print('Mujoco: skipping observation key:', key)
+        if verbose:
+            print('[RobosuiteWrapper] \tMuJoCo: skipping observation key: {}'.format(', '.join(filtered)))
         obs = collections.OrderedDict()
         if len(pixel_modality) > 0:
             obs['pixel'] = pixel_modality
