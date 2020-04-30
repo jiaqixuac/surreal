@@ -95,9 +95,19 @@ class SubprocSurrealParser:
                  'comma seperated list to override'
         )
         parser.add_argument(
+            '--restore-folder', type=str, default=None,
+            help='folder containing checkpoint to restore from'
+        )
+        parser.add_argument(
             '-dr', '--dry-run',
             action='store_true',
             help='print the subprocess commands without actually running.'
+        )
+        parser.add_argument(
+            '--verbose',
+            action='store_true',
+            help='print the helper information for debug perpose'
+                 'e.g., demo path, filtered obs, etc.'
         )
         return parser.parse_args()
 
@@ -124,6 +134,12 @@ class SubprocSurrealParser:
         print('Writing experiment output to {}'.format(experiment_folder))
         algorithm_args += ["--experiment-folder", experiment_folder]
         algorithm_args += ["--env", args.env]
+        if args.restore_folder:
+            # by jqxu, restore, relative to self.folder
+            restore_folder = os.path.join(self.folder, args.restore_folder)
+            algorithm_args += ["--restore-folder", restore_folder]
+        if args.verbose:
+            algorithm_args += ["--verbose"]
         executable = self._find_executable(args.algorithm)
         cmd_gen = CommandGenerator(
             num_agents=args.num_agents,

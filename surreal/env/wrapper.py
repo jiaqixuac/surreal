@@ -223,6 +223,7 @@ class RobosuiteWrapper(Wrapper):
         self.use_depth = env_config.use_depth and env_config.pixel_input
         self._input_list = env_config.observation
         self._action_repeat = env_config.action_repeat or 1
+        self._verbose = env_config.get('verbose', True) # by jqxu, for compact output
 
     def _add_modality(self, obs, verbose=False):
         pixel_modality = collections.OrderedDict()
@@ -298,7 +299,7 @@ class RobosuiteWrapper(Wrapper):
         for k in spec:
             spec[k] = tuple(np.array(spec[k]).shape)
 
-        return self._add_modality(spec, verbose=True)
+        return self._add_modality(spec, verbose=self._verbose)
 
     def action_spec(self): # we haven't finalized the action spec of mujocomanip
         return {'dim': (self.env.dof,), 'type': 'continuous'}

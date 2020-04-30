@@ -47,8 +47,8 @@ def make_env(env_config, mode=None):
     """
     env_name = env_config.env_name
     env_category, env_name = env_name.split(':')
-    if mode == 'eval':
-        print(' *** === EVAL {}'.format(env_config.demonstration))
+    if mode == 'eval' and env_config.get('verbose', True):
+        print(' *** === EVAL {}'.format(env_config.eval_mode.demonstration))
     if mode == 'eval' and 'eval_mode' in env_config:
         for k, v in env_config.eval_mode.items():
             env_config[k] = v
@@ -123,7 +123,9 @@ def make_robosuite(env_name, env_config):
         )
         random.seed() # by jqxu, important as may use same seed to generate same demo for all agents
                       # in DemoSamplerWrapper when num_traj > 0
-        print('*** Using DemoSamplerWrapper: {} ***'.format(demo_path))
+        print('[make_robosuite]', env_config.get('verbose'))
+        if env_config.get('verbose', True):
+            print('[make_robosuite] \t*** Using DemoSamplerWrapper: {} ***'.format(demo_path))
     
     env = RobosuiteWrapper(env, env_config)
     env = FilterWrapper(env, env_config)
@@ -136,8 +138,9 @@ def make_robosuite(env_name, env_config):
             env = FrameStackWrapper(env, env_config)
     env_config.action_spec = env.action_spec()
     env_config.obs_spec = env.observation_spec()
-    print("[make_robosuite] \taction_spec: {}, \n\t\t\tobs_spec: {}\n"
-          .format(env.action_spec(), env.observation_spec())) # by jqxu, debug purpose
+    if env_config.get('verbose', True):
+        print("[make_robosuite] \taction_spec: {}, \n\t\t\tobs_spec: {}\n"
+              .format(env.action_spec(), env.observation_spec())) # by jqxu, debug purpose
     return env, env_config
 
 

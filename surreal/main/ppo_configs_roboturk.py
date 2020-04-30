@@ -233,9 +233,12 @@ class PPOLauncher(SurrealDefaultLauncher):
                             help='how many agents/evals per batch')
         parser.add_argument('--unit-test', action='store_true',
                             help='Set config values to settings that can run locally for unit testing')
+        parser.add_argument('--verbose', action='store_true',
+                            help='print helper information for debug perpose, e.g., demo path, filtered obs, etc.')
 
         args = parser.parse_args(args=argv)
 
+        self.env_config['verbose'] = True if args.verbose else False # by jqxu, for compact output
         self.env_config.env_name = args.env
         self.env_config = make_env_config(self.env_config)
 
@@ -245,6 +248,8 @@ class PPOLauncher(SurrealDefaultLauncher):
         if args.restore_folder is not None:
             self.session_config.checkpoint.restore = True
             self.session_config.checkpoint.restore_folder = args.restore_folder
+            if args.verbose:
+                print("[PPO Launcher] restore folder: {}".format(args.restore_folder))
         self.agent_batch_size = args.agent_batch
         self.eval_batch_size = args.agent_batch
 
