@@ -123,7 +123,6 @@ def make_robosuite(env_name, env_config):
         )
         random.seed() # by jqxu, important as may use same seed to generate same demo for all agents
                       # in DemoSamplerWrapper when num_traj > 0
-        print('[make_robosuite]', env_config.get('verbose'))
         if env_config.get('verbose', True):
             print('[make_robosuite] \t*** Using DemoSamplerWrapper: {} ***'.format(demo_path))
     
