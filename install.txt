@@ -29,6 +29,8 @@ Install Surreal
 		# "File "/research/dept6/jqxu/anaconda3/envs/surreal/lib/python3.7/site-packages/torch/nn/modules/rnn.py", line 129, in flatten_parameters \
     		# self.batch_first, bool(self.bidirectional)) \
 		# RuntimeError: cuDNN error: CUDNN_STATUS_NOT_INITIALIZED"
+		Sometimes may be due to CUDA out of memory
+		check nvidia-smi to leave some space # 32 -> 30 agents on 12GB gpu
 
 	pip install tensorflow=2.0.0 # not tensorflow-gpu
 		# if tensorflow >= 2.1.0 (I guess, cannot remember)
