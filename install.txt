@@ -11,6 +11,7 @@ Requirements
 
 Install MuJoCo
 	License
+		export MUJOCO_PY_MJKEY_PATH=/uac/gds/jqxu/.mujoco/keys/gpu*/mjkey.txt
 	Download
 		from surreal github
 	Unzip
@@ -22,7 +23,7 @@ Install MuJoCo
 
 Install Surreal
 	pip install pygame (1.9.6 in this case for python 3.7)
-	conda install pytorch=1.4.0 torchvision cudatoolkit=10.1 -c pytorch
+	conda install pytorch=1.4.0 torchvision cudatoolkit=10.1 -c pytorch # still cannot fully solve
 		# pytorch 1.5.0 will give warning
 		# set CUDA to 10.1 in .bashrc because when CUDA 10.2
 		# "File "/research/dept6/jqxu/anaconda3/envs/surreal/lib/python3.7/site-packages/torch/nn/modules/rnn.py", line 129, in flatten_parameters \
@@ -60,6 +61,13 @@ Install Surreal
 #ISSUE
 ERROR: GLEW initalization error: Missing GL version
 	https://github.com/openai/mujoco-py/issues/408
-	sudo mkdir -p /usr/lib/nvidia-440
-	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia-440
+	TO FIX: # fixed on my local pc
+		sudo mkdir -p /usr/lib/nvidia-440
+		LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia-440
+
 THEN error: conflicting types for ‘PFNGLFRAGMENTLIGHTFVSGIXPROC’
+	https://github.com/openai/mujoco-py/issues/383
+	TO FIX:
+		as in 383
+		locate eglshim.c
+		//#include <GL/glewt.h>
