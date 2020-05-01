@@ -35,8 +35,8 @@ PPO_DEFAULT_LEARNER_CONFIG = Config({
         'use_z_filter': True,
         'use_r_filter': False,
         'gamma': .995,
-        'n_step': 10, #25,  # 10 for without RNN
-        'stride': 10, #20,  # 10 for without RNN
+        'n_step': 25,  # 10 for without RNN
+        'stride': 20,  # 10 for without RNN
         'network': {
             'lr_actor': 1e-4,
             'lr_critic': 1e-4,
@@ -62,7 +62,7 @@ PPO_DEFAULT_LEARNER_CONFIG = Config({
             'reward_scale': 1.0,
         },
         'rnn': {
-            'if_rnn_policy': False, #True,
+            'if_rnn_policy': True,
             'rnn_hidden': 100,
             'rnn_layer': 1,
             'horizon': 5,
@@ -105,7 +105,7 @@ PPO_DEFAULT_ENV_CONFIG = Config({
     'env_name': '',
     'render': False, # ---> AttributeError: 'Config' object has no attribute 'render'
     'action_repeat': 1,
-    'pixel_input': False,
+    'pixel_input': False, # by jqxu,
     'use_grayscale': False,
     'use_depth': False,
     'frame_stacks': 1,
@@ -177,7 +177,7 @@ PPO_DEFAULT_SESSION_CONFIG = Config({
     },
     'agent': {
         'fetch_parameter_mode': 'step',
-        'fetch_parameter_interval': 10, #100,  # 10 for without RNN
+        'fetch_parameter_interval': 100,  # 10 for without RNN
         'num_gpus': 0,
     },
     'sender': {
