@@ -29,9 +29,6 @@ Install Surreal
 		# "File "/research/dept6/jqxu/anaconda3/envs/surreal/lib/python3.7/site-packages/torch/nn/modules/rnn.py", line 129, in flatten_parameters \
     		# self.batch_first, bool(self.bidirectional)) \
 		# RuntimeError: cuDNN error: CUDNN_STATUS_NOT_INITIALIZED"
-		
-	pip install robosuite==0.2.0
-		https://github.com/StanfordVL/robosuite
 
 	pip install tensorflow=2.0.0 # not tensorflow-gpu
 		# if tensorflow >= 2.1.0 (I guess, cannot remember)
@@ -39,6 +36,8 @@ Install Surreal
 		# Cannot dlopen some TensorRT libraries.
 		# https://github.com/tensorflow/tensorflow/issues/35968
 
+	# pip install robosuite==0.2.0
+		https://github.com/StanfordVL/robosuite
 	git clone robosuite=0.2.0
 		pip install -e .
 			# also change .values to [()] in demo_wrapper
@@ -59,7 +58,10 @@ Install Surreal
 	# export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so # for rendering
 
 #ISSUE
-ERROR: GLEW initalization error: Missing GL version
+When using camera obs: 
+	has_offscreen_renderer=True
+
+ERROR: GLEW initalization error: Missing GL Version
 	https://github.com/openai/mujoco-py/issues/408
 	TO FIX: # fixed on my local pc
 		sudo mkdir -p /usr/lib/nvidia-440
