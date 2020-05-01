@@ -90,6 +90,8 @@ def make_robosuite(env_name, env_config):
         use_object_obs=(not env_config.pixel_input),
         camera_depth=env_config.use_depth,
         reward_shaping=True, # ---> as in paper RoboTurk
+        control_freq=100, # ---> fetal: in demo, freq is 100Hz, otherwise cannot reproduce; 
+                          # while in Surreal paper, freq is 10Hz
         # demo_config=env_config.demonstration,
     )
     
