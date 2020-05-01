@@ -1,0 +1,65 @@
+https://github.com/openai/mujoco-py
+
+Requirements
+	conda create -n robo python=3.7 # 3.8 not work for pygame
+	conda install pip
+	sudo apt install libosmesa6-dev libgl1-mesa-glx libglfw3
+	conda install patchelf
+	# sudo apt install libfreetype6-dev libsdl1.2-dev # for surreal (failed because python 3.8 for pygame)
+	conda install cffi # on proj66
+	# sudo yum install mesa* # on gpu servers
+
+Install MuJoCo
+	License
+	Download
+		from surreal github
+	Unzip
+	~/.bashrc
+		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/jqxu/.mujoco/mjpro150/bin
+	pip install mujoco-py==1.50.1.68 (2.0.2.9 is incompatible with surreal)
+		https://pypi.org/project/mujoco-py/
+
+
+Install Surreal
+	pip install pygame (1.9.6 in this case for python 3.7)
+	conda install pytorch=1.4.0 torchvision cudatoolkit=10.1 -c pytorch
+		# pytorch 1.5.0 will give warning
+		# set CUDA to 10.1 in .bashrc because when CUDA 10.2
+		# "File "/research/dept6/jqxu/anaconda3/envs/surreal/lib/python3.7/site-packages/torch/nn/modules/rnn.py", line 129, in flatten_parameters \
+    		# self.batch_first, bool(self.bidirectional)) \
+		# RuntimeError: cuDNN error: CUDNN_STATUS_NOT_INITIALIZED"
+		
+	pip install robosuite==0.2.0
+		https://github.com/StanfordVL/robosuite
+
+	pip install tensorflow=2.0.0 # not tensorflow-gpu
+		# if tensorflow >= 2.1.0 (I guess, cannot remember)
+                # Could not load dynamic library 'libnvinfer_plugin.so.6';
+		# Cannot dlopen some TensorRT libraries.
+		# https://github.com/tensorflow/tensorflow/issues/35968
+
+	git clone robosuite=0.2.0
+		pip install -e .
+			# also change .values to [()] in demo_wrapper
+
+	git clone my/symphony
+		pip install -e .
+			# CUDA_VISIBLE_DEVICES bug
+
+	# pip install surreal
+		# for mujocoo-py==1.50.1.68
+		ERROR: robosuite 0.3.0 has requirement mujoco-py==2.0.2.2, but you'll have mujoco-py 1.50.1.68 which is incompatible.
+		# OR for mujocoo-py==2.0.2.2
+		ERROR: surreal 0.2.1 requires robosuite, which is not installed.
+	git clone my/surreal
+		# several modify
+
+	sudo apt install libglew-dev
+	# export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so # for rendering
+
+#ISSUE
+ERROR: GLEW initalization error: Missing GL version
+	https://github.com/openai/mujoco-py/issues/408
+	sudo mkdir -p /usr/lib/nvidia-440
+	LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/usr/lib/nvidia-440
+THEN error: conflicting types for ‘PFNGLFRAGMENTLIGHTFVSGIXPROC’
