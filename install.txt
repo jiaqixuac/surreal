@@ -13,7 +13,8 @@ Install MuJoCo
 	License
 		export MUJOCO_PY_MJKEY_PATH=/uac/gds/jqxu/.mujoco/keys/gpu*/mjkey.txt
 	Download
-		from surreal github
+		from surreal github: https://github.com/SurrealAI/surreal/blob/master/docker/Dockerfile-ubuntu
+		wget https://www.roboti.us/download/mjpro150_linux.zip
 	Unzip
 	~/.bashrc
 		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/jqxu/.mujoco/mjpro150/bin
@@ -40,6 +41,8 @@ Install Surreal
 
 	# pip install robosuite==0.2.0
 		https://github.com/StanfordVL/robosuite
+		https://pypi.org/project/robosuite/0.2.0/#modal-close
+		wget https://files.pythonhosted.org/packages/cb/c2/f672fe7022a46022cb42e449c664e519a04d9472fd6479f752dda4d9fb0c/robosuite-0.2.0.tar.gz
 	git clone robosuite=0.2.0
 		pip install -e .
 			# also change .values to [()] in demo_wrapper
