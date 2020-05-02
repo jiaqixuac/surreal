@@ -87,3 +87,13 @@ THEN error: conflicting types for ‘PFNGLFRAGMENTLIGHTFVSGIXPROC’
 		as in 383
 		locate eglshim.c
 		//#include <GL/glewt.h>
+
+headless error: 
+	RuntimeError: Failed to initialize OpenGL
+	Found 8 GPUs for rendering. Using device 1.
+	Could not initialize EGL
+	TO FIX:
+		https://github.com/openai/mujoco-py/issues/512
+		https://github.com/openai/mujoco-py/issues/187
+		https://github.com/deepmind/dm_control/issues/123
+		https://askubuntu.com/questions/244133/how-do-i-get-egl-and-opengles-libraries-for-ubuntu-running-on-virtualbox
