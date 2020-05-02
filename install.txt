@@ -1,5 +1,6 @@
 https://github.com/openai/mujoco-py
 
+
 Requirements
 	conda create -n robo python=3.7 # 3.8 not work for pygame
 	conda install pip
@@ -9,16 +10,21 @@ Requirements
 	conda install cffi # on proj66
 	# sudo yum install mesa* # on gpu servers
 
+
 Install MuJoCo
 	License
 		export MUJOCO_PY_MJKEY_PATH=/uac/gds/jqxu/.mujoco/keys/gpu*/mjkey.txt
 	Download
-		from surreal github: https://github.com/SurrealAI/surreal/blob/master/docker/Dockerfile-ubuntu
-		wget https://www.roboti.us/download/mjpro150_linux.zip
+		# from surreal github: https://github.com/SurrealAI/surreal/blob/master/docker/Dockerfile-ubuntu
+		# wget https://www.roboti.us/download/mjpro150_linux.zip
+		install mujoco 2.0
+		https://github.com/openai/mujoco-py
+		wget https://www.roboti.us/download/mujoco200_linux.zip
 	Unzip
 	~/.bashrc
-		export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/jqxu/.mujoco/mjpro150/bin
-	pip install mujoco-py==1.50.1.68 (2.0.2.9 is incompatible with surreal)
+		# export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/jqxu/.mujoco/mjpro150/bin
+	# pip install mujoco-py==1.50.1.68 (2.0.2.9 is incompatible with surreal)
+	pip install mujoco-py (==2.0.2.9)
 		https://pypi.org/project/mujoco-py/
 
 
@@ -41,11 +47,13 @@ Install Surreal
 
 	# pip install robosuite==0.2.0
 		https://github.com/StanfordVL/robosuite
-		https://pypi.org/project/robosuite/0.2.0/#modal-close
-		wget https://files.pythonhosted.org/packages/cb/c2/f672fe7022a46022cb42e449c664e519a04d9472fd6479f752dda4d9fb0c/robosuite-0.2.0.tar.gz
-	git clone robosuite=0.2.0
+		https://github.com/StanfordVL/robosuite/releases
+		wget https://github.com/StanfordVL/robosuite/archive/v0.2.0.zip 
+	# git clone robosuite=0.2.0
 		pip install -e .
 			# also change .values to [()] in demo_wrapper
+	git clone my/robosuite(modified on 0.3.0)
+		pip install -e .
 
 	git clone my/symphony
 		pip install -e .
@@ -58,6 +66,7 @@ Install Surreal
 		ERROR: surreal 0.2.1 requires robosuite, which is not installed.
 	git clone my/surreal
 		# several modify
+		compatible with the current robosuite
 
 	sudo apt install libglew-dev
 	# export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so # for rendering
