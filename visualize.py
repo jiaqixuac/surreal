@@ -7,7 +7,8 @@ first convert ckpt to pth using pickle.load and torch.save
 cd ~/Projects/RoboTurk/surreal
 #CUDA_VISIBLE_DEVICES="" python visualize.py --env robosuite:SawyerPickPlaceCan --checkpoint ../surreal-subproc/BinPicking32_1/checkpoint/learner.55000.pth#
 #CUDA_VISIBLE_DEVICES="" python visualize.py --folder ../surreal-subproc/BinPicking32_4 --checkpoint ../surreal-subproc/BinPicking32_4/checkpoint/learner.130000.pth
-python visualize.py --folder ../surreal-subproc/BinPicking32_4 --checkpoint ../surreal-subproc/BinPicking32_4/checkpoint/learner.130000.pth --env robosuite:SawyerPickPlaceCan --verbose
+#python visualize.py --folder ../surreal-subproc/BinPicking32_4 --checkpoint ../surreal-subproc/BinPicking32_4/checkpoint/learner.130000.pth --env robosuite:SawyerPickPlaceCan --verbose
+python visualize.py --folder ../surreal-subproc/BinCan32_4 --checkpoint learner.130000.pth --env robosuite:SawyerPickPlaceCan --verbose
 
 # playback in robosuite
 cd ~/Projects/RoboTurk/robosuite/robosuite/scripts
@@ -95,7 +96,7 @@ if __name__ == "__main__":
     env_config.sleep_time = 0.025
     env_config['control_freq'] = 100
     env_config['verbose'] = args.verbose
-    env_config = make_env_config(env_config)
+    env_config = make_env_config(env_config, 'eval')
     
     agent_mode = 'eval_deterministic_local'
     agent = PPOAgent(
@@ -106,15 +107,27 @@ if __name__ == "__main__":
         agent_mode=agent_mode,
         render=True
     )
+
     if args.checkpoint:
-        assert os.path.isfile(args.checkpoint), "No checkpoint at: {}".format(args.checkpoint)
+        checkpoint = os.path.join(args.folder, 'checkpoint', args.checkpoint) # suppose the checkpoint always comes along with its config file
+        assert os.path.isfile(checkpoint), "No checkpoint at: {}".format(checkpoint)
+        if checkpoint.endswith('ckpt'):
+            if not os.path.isfile(checkpoint.replace('ckpt', 'pth')):
+                import pickle
+                with open(checkpoint, 'rb') as f:
+                    data = pickle.load(f)
+                    torch.save({
+                        'model': data['model']
+                    }, checkpoint.replace('ckpt', 'pth'))
+                print("Convert from ckpt file to pth file: {}".format(checkpoint.replace('ckpt', 'pth')))
+            checkpoint = checkpoint.replace('ckpt', 'pth')
         device = torch.device('cuda') if torch.cuda.is_available() \
-                 else torch.device('cpu')
+            else torch.device('cpu')
         print("Use device: {}, cuda available: {}".format(device, torch.cuda.is_available()))
-        data = torch.load(args.checkpoint, map_location=device)
+        data = torch.load(checkpoint, map_location=device)
         assert 'model' in data.keys()
         agent.model.load_state_dict(data['model'])
-        print("\nLoaded checkpoint at: {}\n".format(args.checkpoint))
+        print("\nLoaded checkpoint at: {}\n".format(checkpoint))
     print("Agent created!")
     
     agent.main_eval()
