@@ -52,6 +52,8 @@ class Agent(object, metaclass=U.AutoInitializeMeta):
         if self.agent_mode not in ['eval_deterministic_local', 'eval_stochastic_local']:
             self._setup_parameter_pull()
             self._setup_logging()
+        else:
+            print("[base agent] agent mode: {}\n".format(self.agent_mode))
 
         self.current_episode = 0
         self.cumulative_steps = 0
@@ -254,21 +256,32 @@ class Agent(object, metaclass=U.AutoInitializeMeta):
         env = self.env
         self.pre_episode()
         obs, info = env.reset()
-        total_reward = 0.0
+        step, total_reward = 0, 0.0
+        if self.agent_mode in ['eval_deterministic_local', 'eval_stochastic_local']:
+            # by jqxu for viewing locally
+            env.unwrapped.viewer.set_camera(0)
         while True:
             if self.render:
                 env.unwrapped.render() # TODO: figure out why it needs to be unwrapped
             self.pre_action(obs)
             action = self.act(obs)
+            if self.agent_mode in ('eval_deterministic_local', 'eval_stochastic_local'):
+                time.sleep(self.env_config.sleep_time) # by jqxu
+                print("[base agent], step: {:>3}, dim: {}, jvel_min: {:>9.6f}, jvel_max: {:>9.6f}, grip: {:>9.6f}" 
+                      .format(step, len(action), np.min(action[:7]), np.max(action[:7]), action[-1]))
             obs_next, reward, done, info = env.step(action)
             total_reward += reward
             self.post_action(obs, action, obs_next, reward, done, info)
             obs = obs_next
+            step += 1 # by jqxu, debug purpose
             if done:
+                if self.agent_mode in ('eval_deterministic_local', 'eval_stochastic_local'):
+                    print("[base agent] Done, #steps: {}\n".format(step)) # by jqxu, debug purpose
+                step = 0
                 break
         self.post_episode(total_reward)
 
-        if self.agent_mode in ['eval_deterministic_local', 'eval_stochastic_local']:
+        if self.agent_mode in ('eval_deterministic_local', 'eval_stochastic_local'):
             return
 
         if self.current_episode % 20 == 0:
@@ -286,7 +299,8 @@ class Agent(object, metaclass=U.AutoInitializeMeta):
         """
         Returns a subclass of EnvBase, created from self.env_config
         """
-        if self.agent_mode in ['eval_deterministic', 'eval_stochastic']:
+        if self.agent_mode in ('eval_deterministic', 'eval_stochastic',
+                               'eval_deterministic_local', 'eval_stochastic_local'): # by jqxu, add "local"
             env, _ = make_env(self.env_config, mode='eval')
         else:
             env, _ = make_env(self.env_config)
