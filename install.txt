@@ -53,9 +53,11 @@ Install Surreal
 		pip install -e .
 			# also change .values to [()] in demo_wrapper
 	git clone my/robosuite(modified on 0.3.0)
+		git checkout -b dev origin/dev
 		pip install -e .
 
 	git clone my/symphony
+		git checkout -b dev origin/dev
 		pip install -e .
 			# CUDA_VISIBLE_DEVICES bug
 
@@ -67,6 +69,8 @@ Install Surreal
 	git clone my/surreal
 		# several modify
 		compatible with the current robosuite
+		git checkout -b dev origin/dev
+		pip install -e .
 
 	sudo apt install libglew-dev
 	# export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so # for rendering
