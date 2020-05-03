@@ -104,13 +104,19 @@ def make_robosuite(env_name, env_config):
         from robosuite.wrappers.demo_sampler_wrapper import DemoSamplerWrapper
         import random
         
-        VALID_ENVIRONMENTS = ('SawyerPickPlaceCan', 'SawyerNutAssemblyRound')
+        VALID_ENVIRONMENTS = ('SawyerPickPlaceCan', 'SawyerNutAssemblyRound', # as in the RoboTurk paper
+                              'SawyerPickPlaceMilk', 'SawyerPickPlaceBread', 'SawyerPickPlaceCereal', 'SawyerNutAssemblySquare',) # for local eval purpose
         assert env_name in VALID_ENVIRONMENTS, 'Not available for use demo: {}'.format(env_name)
         
         
         task_2_folder = {
             'SawyerPickPlaceCan': 'bins-Can',
             'SawyerNutAssemblyRound': 'pegs-RoundNut',
+
+            'SawyerPickPlaceMilk': 'bins-Milk',
+            'SawyerPickPlaceBread': 'bins-Bread',
+            'SawyerPickPlaceCereal': 'bins-Cereal',
+            'SawyerNutAssemblySquare': 'pegs-SquareNut',
         }
         demo_path = os.path.join(
             env_config.demonstration['demo_root'], task_2_folder[env_name]
