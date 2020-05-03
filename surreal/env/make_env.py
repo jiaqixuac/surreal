@@ -90,7 +90,7 @@ def make_robosuite(env_name, env_config):
         use_object_obs=(not env_config.pixel_input),
         camera_depth=env_config.use_depth,
         reward_shaping=True, # ---> as in paper RoboTurk
-        control_freq=100, # ---> fetal: in demo, freq is 100Hz, otherwise cannot reproduce; 
+        control_freq=env_config.get('control_freq', 10), # ---> fetal: in demo, freq is 100Hz, otherwise cannot reproduce; 
                           # while in Surreal paper, freq is 10Hz
         # demo_config=env_config.demonstration,
     )
@@ -100,7 +100,7 @@ def make_robosuite(env_name, env_config):
 #         print('\n{}\n{}\n'.format(env_name, env_config))
 #     assert 'use_demo' in env_config.demonstration, "Error: {}".format(env_config)
 #     print(env_config.demonstration)
-    if env_config.demonstration and env_config.demonstration['use_demo']:
+    if env_config.get('demonstration', None) and env_config.demonstration.get('use_demo', False):
         from robosuite.wrappers.demo_sampler_wrapper import DemoSamplerWrapper
         import random
         

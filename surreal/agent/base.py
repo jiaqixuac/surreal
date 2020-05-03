@@ -267,8 +267,9 @@ class Agent(object, metaclass=U.AutoInitializeMeta):
             action = self.act(obs)
             if self.agent_mode in ('eval_deterministic_local', 'eval_stochastic_local'):
                 time.sleep(self.env_config.sleep_time) # by jqxu
-                print("[base agent], step: {:>3}, dim: {}, jvel_min: {:>9.6f}, jvel_max: {:>9.6f}, grip: {:>9.6f}" 
-                      .format(step, len(action), np.min(action[:7]), np.max(action[:7]), action[-1]))
+                if self.env_config.get('verbose', False):
+                    print("[base agent], step: {:>3}, dim: {}, jvel_min: {:>9.6f}, jvel_max: {:>9.6f}, grip: {:>9.6f}" 
+                          .format(step, len(action), np.min(action[:7]), np.max(action[:7]), action[-1]))
             obs_next, reward, done, info = env.step(action)
             total_reward += reward
             self.post_action(obs, action, obs_next, reward, done, info)
