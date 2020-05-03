@@ -1,3 +1,5 @@
-upgrade mujoco and robosuite
-	mujoco:		1.50.1 -> 2.0.2.?
+upgrade mujoco and robosuite (Done)
+	mujoco:		1.50.1 -> 2.0.2.9
 	robosuite:	0.2.0  -> 0.3.0
+
+Enable OpenGL offscreen rendering on multiple gpus
