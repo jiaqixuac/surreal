@@ -1,0 +1,99 @@
+"""
+This file try to load the checkpoint of the agent using the config file
+set up the agent as surreal/launch/launcher.py
+and render the process
+
+first change ckpt to pth using pickle.load and torch.save
+cd ~/Projects/RoboTurk/surreal
+#CUDA_VISIBLE_DEVICES="" python visualize.py --env robosuite:SawyerPickPlaceCan --checkpoint ../surreal-subproc/BinPicking32_1/checkpoint/learner.55000.pth#
+CUDA_VISIBLE_DEVICES="" python visualize.py --folder ../surreal-subproc/BinPicking32_4 --checkpoint ../surreal-subproc/BinPicking32_4/checkpoint/learner.130000.pth
+
+cd ~/Projects/RoboTurk/robosuite/robosuite/scripts
+python playback_demonstrations_from_hdf5.py --folder /home/jqxu/data/RoboTurk/RoboTurkPilot/bins-Can/
+"""
+import argparse
+import os
+import torch
+
+from surreal.agent import PPOAgent
+from surreal.main.ppo_configs_roboturk import (
+    PPO_DEFAULT_LEARNER_CONFIG,
+    PPO_DEFAULT_ENV_CONFIG,
+    PPO_DEFAULT_SESSION_CONFIG
+)
+from surreal.env import make_env, make_env_config
+
+from benedict import BeneDict
+
+
+def restore_config(path_to_config):
+    """
+    Loads a config from a file.
+    """
+    configs = BeneDict.load_yaml_file(path_to_config)
+    return configs
+
+
+parser = argparse.ArgumentParser()
+parser.add_argument(
+    '--env', 
+    type=str, 
+    help='name of the environment'
+)
+parser.add_argument(
+    "--folder", 
+    type=str, 
+    required=True,
+    help='the folder contain config info'
+)
+parser.add_argument(
+    '--checkpoint',
+    type=str,
+    required=True,
+    help='which checkpoint want the agent to restore'
+)
+
+args = parser.parse_args()
+
+
+if __name__ == "__main__":
+    
+    # restore configs
+    configs = restore_config(os.path.join(args.folder, 'config.yml'))
+    session_config, learner_config, env_config = \
+        configs.session_config, configs.learner_config, configs.env_config
+    
+#     learner_config = PPO_DEFAULT_LEARNER_CONFIG
+#     env_config = PPO_DEFAULT_ENV_CONFIG
+#     session_config = PPO_DEFAULT_SESSION_CONFIG
+    
+#     print("The environment is: [{}]".format(args.env))
+#     env_config.env_name = args.env
+    print("The environment is: [{}]".format(env_config.env_name))
+    env_config.render = True
+    env_config.sleep_time = 0.02
+    env_config = make_env_config(env_config)
+    
+    agent_mode = 'eval_deterministic_local'
+    agent = PPOAgent(
+        learner_config=learner_config,
+        env_config=env_config,
+        session_config=session_config,
+        agent_id=0,
+        agent_mode=agent_mode,
+        render=True
+    )
+    if args.checkpoint:
+        if os.path.isfile(args.checkpoint):
+            device = torch.device('cuda') if torch.cuda.is_available() \
+                else torch.device('cpu')
+            print(device, torch.cuda.is_available())
+            data = torch.load(args.checkpoint, map_location=device)
+            assert 'model' in data.keys()
+            agent.model.load_state_dict(data['model'])
+            print("Loaded checkpoint at: {}".format(args.checkpoint))
+        else:
+            print("No checkpoint at: {}".format(args.checkpoint))
+    print("Agent created!")
+    
+    agent.main_eval()
