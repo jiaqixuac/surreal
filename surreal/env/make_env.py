@@ -89,7 +89,7 @@ def make_robosuite(env_name, env_config):
         camera_name='agentview',
         use_object_obs=(not env_config.pixel_input),
         camera_depth=env_config.use_depth,
-        reward_shaping=True, # ---> as in paper RoboTurk
+        reward_shaping=env_config.get('reward_shaping', True), # ---> as in paper RoboTurk
         control_freq=env_config.get('control_freq', 10), # ---> fetal: in demo, freq is 100Hz, otherwise cannot reproduce; 
                           # while in Surreal paper, freq is 10Hz
         # demo_config=env_config.demonstration,

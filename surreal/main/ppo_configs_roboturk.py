@@ -111,6 +111,7 @@ PPO_DEFAULT_ENV_CONFIG = Config({
     'frame_stacks': 1,
     'sleep_time': 0,
     'control_freq': 10, # by jqxu, default: 10 in surreal paper
+    'reward_shaping': True, # by jqxu, default: True in surreal paper
     'video': {
         'record_video': False,
         'save_folder': None,
