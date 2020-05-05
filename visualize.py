@@ -50,7 +50,7 @@ parser.add_argument(
 parser.add_argument(
     '--checkpoint',
     type=str,
-    required=True,
+    default=None,
     help='which checkpoint want the agent to restore'
 )
 parser.add_argument(
@@ -72,9 +72,18 @@ parser.add_argument(
 args = parser.parse_args()
 
 
-def restore_model(folder, checkpoint):
-    path_to_ckpt = os.path.join(args.folder, 'checkpoint',
-                                args.checkpoint)  # suppose the checkpoint always comes along with its config file
+def restore_model(folder, checkpoint=None):
+    if checkpoint==None:
+        assert os.path.exists(os.path.join(folder, 'checkpoint')), "No checkpoint folder found: {}".format(os.path.join(folder, 'checkpoint'))
+        files = os.listdir(os.path.join(folder, 'checkpoint'))
+        files.sort()
+        for file in files:
+            if file.endswith('ckpt') or file.endswith('pth'):
+                checkpoint = file
+        print("Given no checkpoints, use the checkpoint: {}".format(checkpoint))
+
+    path_to_ckpt = os.path.join(folder, 'checkpoint',
+                                checkpoint)  # suppose the checkpoint always comes along with its config file
     assert os.path.isfile(path_to_ckpt), "No checkpoint at: {}".format(path_to_ckpt)
     if path_to_ckpt.endswith('ckpt'):
         if not os.path.isfile(path_to_ckpt.replace('ckpt', 'pth')):
@@ -145,7 +154,7 @@ if __name__ == "__main__":
         render=True
     )
 
-    if args.checkpoint:
+    if args.folder:
         model, path_to_ckpt = restore_model(args.folder, args.checkpoint)
         agent.model.load_state_dict(model)
         print("\nLoaded checkpoint at: {}\n".format(path_to_ckpt))
