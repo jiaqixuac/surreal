@@ -5,3 +5,5 @@ upgrade mujoco and robosuite (Done)
 Enable OpenGL offscreen rendering on multiple gpus
 
 TensorRT
+
+Check why different model size on gpu/proj

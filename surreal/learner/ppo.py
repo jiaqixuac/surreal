@@ -630,7 +630,9 @@ class PPOLearner(Learner):
             iteration: the current number of learning iterations
             message: optional message, must be pickleable.
         """
-        if  self.exp_counter >= self.learner_config.parameter_publish.exp_interval:
+        if not self.first_publish or self.exp_counter >= self.learner_config.parameter_publish.exp_interval:
+            print("[Learner PPO] publish parameters")
+            self.first_publish = True
             self._ps_publisher.publish(iteration, message=message)
             self._post_publish()  
 

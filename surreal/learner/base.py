@@ -38,6 +38,7 @@ class Learner(metaclass=U.AutoInitializeMeta):
         self.learner_config = learner_config
         self.env_config = env_config
         self.session_config = session_config
+        self.first_publish = False
         self.current_iter = 0
 
         self._setup_logging()
@@ -131,7 +132,7 @@ class Learner(metaclass=U.AutoInitializeMeta):
     # Parameter publish
     ######
     def should_publish_parameter(self):
-        return self._ps_publish_tracker.track_increment()
+        return not self.first_publish or self._ps_publish_tracker.track_increment()
 
     def publish_parameter(self, iteration, message=''):
         """
@@ -141,6 +142,7 @@ class Learner(metaclass=U.AutoInitializeMeta):
             iteration: the current number of learning iterations
             message: optional message, must be pickleable.
         """
+        self.first_publish = True
         self._ps_publisher.publish(iteration, message=message)
 
     ######
