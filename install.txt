@@ -72,6 +72,9 @@ Install Surreal
 		git checkout -b dev origin/dev
 		pip install -e .
 
+    pip install imageio-ffmpeg
+        # for visualize.py --record
+
 	sudo apt install libglew-dev
 	# export LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libGLEW.so # for rendering
 

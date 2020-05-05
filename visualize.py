@@ -1,14 +1,11 @@
 """
-This file try to load the checkpoint of the agent using the config file
-set up the agent as surreal/launch/launcher.py
-and render the process
+This file try to load the checkpoint of the agent using the config file,
+set up the agent as surreal/launch/launcher.py and render the process
+Adapt from surreal/main/rollout.py
 
-first convert ckpt to pth using pickle.load and torch.save
 cd ~/Projects/RoboTurk/surreal
-#CUDA_VISIBLE_DEVICES="" python visualize.py --env robosuite:SawyerPickPlaceCan --checkpoint ../surreal-subproc/BinPicking32_1/checkpoint/learner.55000.pth#
-#CUDA_VISIBLE_DEVICES="" python visualize.py --folder ../surreal-subproc/BinPicking32_4 --checkpoint ../surreal-subproc/BinPicking32_4/checkpoint/learner.130000.pth
-#python visualize.py --folder ../surreal-subproc/BinPicking32_4 --checkpoint ../surreal-subproc/BinPicking32_4/checkpoint/learner.130000.pth --env robosuite:SawyerPickPlaceCan --verbose
-python visualize.py --folder ../surreal-subproc/BinCan32_4 --checkpoint learner.130000.pth --env robosuite:SawyerPickPlaceCan --verbose
+python visualize.py --folder ../surreal-subproc/BinCan32_4 --checkpoint learner.130000.pth
+--env robosuite:SawyerPickPlaceCan/SawyerNutAssemblyRound --verbose --record
 
 # playback in robosuite
 cd ~/Projects/RoboTurk/robosuite/robosuite/scripts
@@ -62,28 +59,56 @@ parser.add_argument(
     action='store_true',
     help='whether to print action range'
 )
+parser.add_argument(
+    '--record',
+    action='store_true'
+)
+parser.add_argument(
+    '--record-every',
+    type=int,
+    default=1,
+)
 
 args = parser.parse_args()
 
 
+def restore_model(folder, checkpoint):
+    path_to_ckpt = os.path.join(args.folder, 'checkpoint',
+                                args.checkpoint)  # suppose the checkpoint always comes along with its config file
+    assert os.path.isfile(path_to_ckpt), "No checkpoint at: {}".format(path_to_ckpt)
+    if path_to_ckpt.endswith('ckpt'):
+        if not os.path.isfile(path_to_ckpt.replace('ckpt', 'pth')):
+            import pickle
+            with open(path_to_ckpt, 'rb') as f:
+                data = pickle.load(f)
+                torch.save({
+                    'model': data['model']
+                }, path_to_ckpt.replace('ckpt', 'pth'))
+            print("Convert from ckpt file to pth file: {}".format(path_to_ckpt.replace('ckpt', 'pth')))
+        path_to_ckpt = path_to_ckpt.replace('ckpt', 'pth')
+    device = torch.device('cuda') if torch.cuda.is_available() \
+        else torch.device('cpu')
+    print("Use device: {}, cuda available: {}".format(device, torch.cuda.is_available()))
+    data = torch.load(path_to_ckpt, map_location=device)
+    assert 'model' in data.keys()
+    return data['model'], path_to_ckpt
+
+
 if __name__ == "__main__":
-    
+
+    # ======== deprecated ========
+    #     # config file may have been changed since recent modification
+    #     # use code above to restore config
+
+    #     learner_config = PPO_DEFAULT_LEARNER_CONFIG
+    #     env_config = PPO_DEFAULT_ENV_CONFIG
+    #     session_config = PPO_DEFAULT_SESSION_CONFIG
+    # ======== deprecated end ========
+
     # restore configs
     configs = restore_config(os.path.join(args.folder, 'config.yml'))
     session_config, learner_config, env_config = \
         configs.session_config, configs.learner_config, configs.env_config
-
-# ======== deprecated ========
-#     # config file may have been changed since recent modification
-#     # use code above to restore config
-
-#     learner_config = PPO_DEFAULT_LEARNER_CONFIG
-#     env_config = PPO_DEFAULT_ENV_CONFIG
-#     session_config = PPO_DEFAULT_SESSION_CONFIG 
-# ======== deprecated end ========
-    
-#     print("The environment is: [{}]".format(args.env))
-#     env_config.env_name = args.env
 
     if args.env and args.env != env_config.env_name:
         print("\n!!! Warning !!!")
@@ -92,10 +117,22 @@ if __name__ == "__main__":
     else:
         print("\nThe environment is: [{}]\n".format(env_config.env_name))
 
+    if args.record:
+        record_folder = os.path.join(args.folder, 'video')
+        os.makedirs(record_folder, exist_ok=True)
+    else:
+        record_folder = None
+
+    # update the environment
     env_config.render = True
     env_config.sleep_time = 0.025
     env_config['control_freq'] = 100
     env_config['verbose'] = args.verbose
+
+    env_config.video.record_video = args.record
+    env_config.video.record_every = args.record_every
+    env_config.video.save_folder = record_folder
+
     env_config = make_env_config(env_config, 'eval')
     
     agent_mode = 'eval_deterministic_local'
@@ -109,25 +146,9 @@ if __name__ == "__main__":
     )
 
     if args.checkpoint:
-        checkpoint = os.path.join(args.folder, 'checkpoint', args.checkpoint) # suppose the checkpoint always comes along with its config file
-        assert os.path.isfile(checkpoint), "No checkpoint at: {}".format(checkpoint)
-        if checkpoint.endswith('ckpt'):
-            if not os.path.isfile(checkpoint.replace('ckpt', 'pth')):
-                import pickle
-                with open(checkpoint, 'rb') as f:
-                    data = pickle.load(f)
-                    torch.save({
-                        'model': data['model']
-                    }, checkpoint.replace('ckpt', 'pth'))
-                print("Convert from ckpt file to pth file: {}".format(checkpoint.replace('ckpt', 'pth')))
-            checkpoint = checkpoint.replace('ckpt', 'pth')
-        device = torch.device('cuda') if torch.cuda.is_available() \
-            else torch.device('cpu')
-        print("Use device: {}, cuda available: {}".format(device, torch.cuda.is_available()))
-        data = torch.load(checkpoint, map_location=device)
-        assert 'model' in data.keys()
-        agent.model.load_state_dict(data['model'])
-        print("\nLoaded checkpoint at: {}\n".format(checkpoint))
+        model, path_to_ckpt = restore_model(args.folder, args.checkpoint)
+        agent.model.load_state_dict(model)
+        print("\nLoaded checkpoint at: {}\n".format(path_to_ckpt))
     print("Agent created!")
     
     agent.main_eval()
